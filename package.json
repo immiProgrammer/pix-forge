@@ -1,0 +1,32 @@
+{
+  "name": "pix-forge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PixForge desktop application and website monorepo",
+  "packageManager": "pnpm@12.15.0",
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=12"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:desktop": "turbo run dev --filter=@pixforge/desktop",
+    "dev:web": "turbo run dev --filter=@pixforge/web",
+    "build": "turbo run build",
+    "build:desktop": "turbo run build --filter=@pixforge/desktop",
+    "build:web": "turbo run build --filter=@pixforge/web",
+    "test": "turbo run test",
+    "check-types": "turbo run check-types",
+    "format": "turbo run format",
+    "tauri": "node scripts/tauri.mjs",
+    "dist:exe": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Bundle nsis",
+    "dist:msi": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Bundle msi",
+    "dist:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Bundle all",
+    "dist:app": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Bundle app"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.10",
+    "prettier": "^3.9.10",
+    "@scalar/rust-fmt": "^0.3.0"
+  }
+}

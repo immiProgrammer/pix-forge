@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Convert, compress, resize, and rename image folders locally with PixForge for Windows. Compare processed results and export with your folder structure intact."
+    />
+    <meta name="theme-color" content="#141414" />
+    <link rel="icon" type="image/svg+xml" href="/app-icon.svg" />
+    <link
+      rel="preload"
+      href="/fonts/roboto-latin-variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/newsreader-latin-variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <title>PixForge | Batch Image Converter</title>
+    <script>
+      try {
+        const preference =
+          localStorage.getItem("pixforge-site-theme") || "system";
+        document.documentElement.dataset.theme =
+          preference === "system"
+            ? matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light"
+            : preference;
+      } catch {
+        document.documentElement.dataset.theme = matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches
+          ? "dark"
+          : "light";
+      }
+      document
+        .querySelector('meta[name="theme-color"]')
+        .setAttribute(
+          "content",
+          document.documentElement.dataset.theme === "dark"
+            ? "#141414"
+            : "#fafafa",
+        );
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

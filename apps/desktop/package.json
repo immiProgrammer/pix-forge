@@ -1,0 +1,42 @@
+{
+  "name": "@pixforge/desktop",
+  "version": "0.1.0",
+  "description": "PixForge desktop image converter, compressor, and renamer",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "check-types": "tsc --noEmit",
+    "tauri": "node ../../scripts/tauri.mjs",
+    "format": "prettier --write src vite.config.ts && node ../../scripts/format-rust.mjs"
+  },
+  "keywords": [],
+  "type": "module",
+  "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@tanstack/react-virtual": "^3.14.22",
+    "@tauri-apps/api": "^2.12.4",
+    "@tauri-apps/plugin-dialog": "^2.8.3",
+    "@tauri-apps/plugin-opener": "^2.7.2",
+    "@viselect/vanilla": "^3.10.1",
+    "lucide-react": "^1.61.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@scalar/rust-fmt": "^0.3.0",
+    "@tauri-apps/cli": "^2.12.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5",
+    "@pixforge/typescript-config": "workspace:*"
+  },
+  "private": true
+}

@@ -1,0 +1,31 @@
+[package]
+name = "pix-forge"
+version = "0.1.0"
+description = "Local batch image workbench"
+authors = ["PixForge"]
+edition = "2021"
+
+[lib]
+name = "pix_forge_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+image = { version = "0.25", features = ["avif", "avif-native"] }
+webp = "0.3"
+walkdir = "2"
+imagesize = "0.15"
+fast_image_resize = { version = "6.1", features = ["image"] }
+sysinfo = { version = "0.39", default-features = false, features = ["system"] }
+jpeg-encoder = { version = "0.7", features = ["simd"] }
+sha2 = "0.10"
+tokio = { version = "1", features = ["sync"] }
+tempfile = "3"
+

@@ -1,0 +1,115 @@
+name: Build and publish site for Dokploy
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "apps/web/**"
+      - "!apps/web/**/*.md"
+      - "packages/typescript-config/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "deploy/nginx.conf"
+      - ".github/workflows/site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-production
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ${{ vars.CONTAINER_REGISTRY || 'registry.geto.pk' }}
+  IMAGE_NAME: ${{ vars.SITE_IMAGE_NAME || 'pix-forge-site' }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
+            type=raw,value={{date 'YYYYMMDD-HHmmss'}}
+
+      - name: Build static site image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=pixforge-site
+          cache-to: type=gha,mode=max,scope=pixforge-site
+          build-args: |
+            VITE_RELEASES_URL=${{ vars.VITE_RELEASES_URL }}
+            VITE_GITHUB_URL=${{ vars.VITE_GITHUB_URL }}
+
+      - name: Temporarily allow runner through Cloudflare
+        uses: xiaotianxt/bypass-cloudflare-for-github-action@v2.1.0
+        with:
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          cf_zone_id: ${{ secrets.CF_ZONE_ID }}
+          cf_api_token: ${{ secrets.CF_API_TOKEN }}
+          disable_bot_fight_mode: "true"
+          bfm_propagation_delay: "0"
+
+      - name: Wait for Cloudflare edge propagation
+        run: sleep 25
+
+      - name: Log in to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Wait for registry readiness
+        run: sleep 10
+
+      - name: Push image tags
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          while IFS= read -r tag; do
+            if [ -n "$tag" ]; then
+              docker push "$tag"
+            fi
+          done <<< "$IMAGE_TAGS"
+
+      - name: Deploy in Dokploy (optional)
+        env:
+          DOKPLOY_URL: ${{ vars.DOKPLOY_URL }}
+          DOKPLOY_APPLICATION_ID: ${{ vars.DOKPLOY_APPLICATION_ID }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+        if: success()
+        run: |
+          if [ -n "$DOKPLOY_API_KEY" ]; then
+            test -n "$DOKPLOY_URL"
+            test -n "$DOKPLOY_APPLICATION_ID"
+            payload=$(jq -n --arg id "$DOKPLOY_APPLICATION_ID" '{applicationId: $id}')
+            curl --fail --silent --show-error --output /dev/null \
+              --connect-timeout 15 --max-time 60 \
+              --header "x-api-key: $DOKPLOY_API_KEY" \
+              --header 'Content-Type: application/json' \
+              --data "$payload" "${DOKPLOY_URL%/}/api/application.deploy"
+          fi

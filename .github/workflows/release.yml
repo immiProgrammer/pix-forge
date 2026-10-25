@@ -1,0 +1,131 @@
+name: Release Windows
+
+on:
+  push:
+    tags: ["v[0-9]*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing version tag to build (for example v0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  windows:
+    name: Build Windows x64 installers
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-windows
+
+      - name: Validate release tag and app versions
+        run: node scripts/release-version.mjs
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+      - name: Test native engine
+        shell: pwsh
+        run: |
+          . ./scripts/windows-env.ps1
+          cargo test --locked --manifest-path apps/desktop/src-tauri/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { throw 'Native tests failed.' }
+
+      - name: Build EXE and MSI installers
+        shell: pwsh
+        run: ./scripts/build-windows.ps1 -Bundle all -Locked
+
+      - name: Collect installers and checksums
+        shell: pwsh
+        run: |
+          $releaseFiles = Join-Path $env:RUNNER_TEMP 'release-files'
+          New-Item -ItemType Directory -Path $releaseFiles -Force | Out-Null
+          $bundleDirectory = 'apps/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle'
+          $exe = @(Get-ChildItem "$bundleDirectory/nsis/*.exe")
+          $msi = @(Get-ChildItem "$bundleDirectory/msi/*.msi")
+          if ($exe.Count -ne 1 -or $msi.Count -ne 1) { throw 'Expected one EXE installer and one MSI installer.' }
+          $installers = @($exe[0], $msi[0])
+          foreach ($file in $installers) { Copy-Item -LiteralPath $file.FullName -Destination $releaseFiles }
+          $checksums = Get-ChildItem -LiteralPath $releaseFiles -File | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)"
+          }
+          $checksums | Set-Content -LiteralPath (Join-Path $releaseFiles 'SHA256SUMS.txt') -Encoding utf8NoBOM
+
+      - name: Upload release build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixforge-windows-x64
+          path: ${{ runner.temp }}/release-files/*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish GitHub Release
+    needs: windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pixforge-windows-x64
+          path: release-files
+
+      - name: Upload assets and publish release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const tag = process.env.RELEASE_TAG;
+            const repo = context.repo;
+            const names = fs.readdirSync('release-files').sort();
+            if (names.length !== 3 || !names.includes('SHA256SUMS.txt') ||
+                !names.some(n => n.endsWith('.exe')) || !names.some(n => n.endsWith('.msi'))) {
+              throw new Error('Missing expected release artifacts.');
+            }
+            let release;
+            try {
+              release = (await github.rest.repos.getReleaseByTag({ ...repo, tag })).data;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (release && !release.draft) {
+              throw new Error(`Release ${tag} is already published. Publish a new version instead of replacing assets.`);
+            }
+            if (!release) {
+              const notes = await github.rest.repos.generateReleaseNotes({ ...repo, tag_name: tag });
+              release = (await github.rest.repos.createRelease({
+                ...repo, tag_name: tag, name: `PixForge ${tag}`, draft: true,
+                prerelease: tag.includes('-'),
+                body: `Windows x64 installers: choose the EXE setup or MSI package. Checksums are in SHA256SUMS.txt.\n\nThese builds are unsigned. WebView2 is required.\n\n${notes.data.body}`
+              })).data;
+            }
+            for (const name of names) {
+              const existing = release.assets.find(asset => asset.name === name);
+              if (existing) await github.rest.repos.deleteReleaseAsset({ ...repo, asset_id: existing.id });
+              const data = fs.readFileSync(path.join('release-files', name));
+              await github.rest.repos.uploadReleaseAsset({
+                ...repo, release_id: release.id, name, data,
+                headers: { 'content-type': 'application/octet-stream', 'content-length': data.length }
+              });
+            }
+            await github.rest.repos.updateRelease({ ...repo, release_id: release.id, draft: false });
+            await core.summary.addHeading(`Published PixForge ${tag}`).addLink('Open release', release.html_url).write();
