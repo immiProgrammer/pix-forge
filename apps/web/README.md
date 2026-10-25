@@ -32,11 +32,11 @@ The workspace screenshots follow the site's light/dark theme. Comparison and lis
 Copy `.env.example` to `.env.local` and optionally set:
 
 ```dotenv
-VITE_RELEASES_URL=https://github.com/OWNER/REPO/releases/latest
-VITE_GITHUB_URL=https://github.com/OWNER/REPO
+VITE_RELEASES_URL=https://github.com/immiProgrammer/pix-forge/releases/latest
+VITE_GITHUB_URL=https://github.com/immiProgrammer/pix-forge
 ```
 
-Set these at build time on the hosting service as well. Only HTTPS links are accepted. If no published release URL is configured, the site offers local build instructions rather than a broken download link. There is no AI account connection, analytics integration, or external image request at runtime.
+These are the built-in defaults. To override them, set HTTPS links at build time on the hosting service. There is no AI account connection, analytics integration, or external image request at runtime.
 
 ## Image credits
 

@@ -34,8 +34,12 @@ const safeUrl = (value: string | undefined) => {
     return undefined;
   }
 };
-const releasesUrl = safeUrl(import.meta.env.VITE_RELEASES_URL);
-const sourceUrl = safeUrl(import.meta.env.VITE_GITHUB_URL);
+const releasesUrl =
+  safeUrl(import.meta.env.VITE_RELEASES_URL) ??
+  "https://github.com/immiProgrammer/pix-forge/releases/latest";
+const sourceUrl =
+  safeUrl(import.meta.env.VITE_GITHUB_URL) ??
+  "https://github.com/immiProgrammer/pix-forge";
 const buildCommand = "pnpm install\npnpm dist:windows";
 const features = [
   {
