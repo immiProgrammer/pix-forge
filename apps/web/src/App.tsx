@@ -151,7 +151,7 @@ function WorkspaceScreenshots() {
       <figure className="app-screenshot workspace-capture">
         <img
           className="capture-light"
-          src="/screenshots/light-fill.png"
+          src="/screenshots/light-fill.webp"
           alt="PixForge in light mode with a product photo grid and output settings"
           width="1442"
           height="1002"
@@ -160,7 +160,7 @@ function WorkspaceScreenshots() {
         />
         <img
           className="capture-dark"
-          src="/screenshots/dark-fill.png"
+          src="/screenshots/dark-fill.webp"
           alt="PixForge in dark mode with a product photo grid and output settings"
           width="1442"
           height="1002"
@@ -200,7 +200,7 @@ function ComparisonScreenshots() {
       <div className="capture-grid">
         <figure className="app-screenshot">
           <img
-            src="/screenshots/compare-sides.png"
+            src="/screenshots/compare-sides.webp"
             alt="PixForge side-by-side comparison of original and processed watch details"
             width="1442"
             height="1002"
@@ -215,7 +215,7 @@ function ComparisonScreenshots() {
         </figure>
         <figure className="app-screenshot">
           <img
-            src="/screenshots/compare-slider.png"
+            src="/screenshots/compare-slider.webp"
             alt="PixForge slider comparison zoomed into keyboard details, showing dimensions and size reduction"
             width="1442"
             height="1002"
@@ -230,7 +230,7 @@ function ComparisonScreenshots() {
         </figure>
         <figure className="app-screenshot capture-list">
           <img
-            src="/screenshots/list-view.png"
+            src="/screenshots/list-view.webp"
             alt="PixForge list view showing filenames, dimensions, original sizes, and processed results"
             width="1442"
             height="1002"

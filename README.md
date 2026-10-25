@@ -15,8 +15,8 @@
 </p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/screenshots/dark-fill.png" />
-  <img src="apps/web/public/screenshots/light-fill.png" alt="PixForge showing a folder of product photos with format, quality, and size settings" />
+  <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/screenshots/dark-fill.webp" />
+  <img src="apps/web/public/screenshots/light-fill.webp" alt="PixForge showing a folder of product photos with format, quality, and size settings" />
 </picture>
 
 PixForge helps you prepare product photos, website images, portfolios, and other
