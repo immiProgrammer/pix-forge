@@ -692,7 +692,11 @@ mod tests {
 
     #[test]
     fn continuous_queue_does_not_wait_for_a_slow_image() {
-        let engine = Engine::new();
+        let mut engine = Engine::new();
+        // This test needs two active workers regardless of the host's CPU count.
+        // The production policy deliberately leaves only one slot on two-thread CI runners.
+        engine.worker_count = 2;
+        engine.workers = Arc::new(tokio::sync::Semaphore::new(2));
         let (release, wait) = std::sync::mpsc::channel();
         let wait = Mutex::new(wait);
         let mut completed = Vec::new();
