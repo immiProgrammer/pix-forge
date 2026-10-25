@@ -15,7 +15,7 @@ Development uses port **5174**. Deploy **`apps/web/dist`** as a static site afte
 
 ## Docker and Dokploy
 
-The repository-root `Dockerfile` builds the website and serves static files with Nginx on port **8080**. No Node.js runs in production. See [the Dokploy guide](../../docs/DOKPLOY.md) for direct repository deployment, registry credentials, optional automatic deployment, and build arguments. The site publishing workflow is `.github/workflows/site.yml`.
+The repository-root `Dockerfile` builds the website and serves static files with Nginx on port **8080**. No Node.js runs in production. See [the Dokploy guide](../../docs/DOKPLOY.md) for direct repository deployment, registry credentials, and optional automatic deployment. The site publishing workflow is `.github/workflows/site.yml`.
 
 ## Theme and content
 
@@ -29,14 +29,9 @@ The workspace screenshots follow the site's light/dark theme. Comparison and lis
 
 ## Releases and source links
 
-Copy `.env.example` to `.env.local` and optionally set:
+The site links directly to [the latest release](https://github.com/immiProgrammer/pix-forge/releases/latest) and [the source repository](https://github.com/immiProgrammer/pix-forge). These links are defined in `src/App.tsx`; no environment variables or Docker build arguments are needed. To change them, edit the source and rebuild the site.
 
-```dotenv
-VITE_RELEASES_URL=https://github.com/immiProgrammer/pix-forge/releases/latest
-VITE_GITHUB_URL=https://github.com/immiProgrammer/pix-forge
-```
-
-These are the built-in defaults. To override them, set HTTPS links at build time on the hosting service. There is no AI account connection, analytics integration, or external image request at runtime.
+There is no AI account connection, analytics integration, or external image request at runtime.
 
 ## Image credits
 

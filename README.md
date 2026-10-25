@@ -7,7 +7,7 @@
 <p align="center">Convert, compress, resize, and rename image folders on your computer.</p>
 
 <p align="center">
-  <a href="https://github.com/immiProgrammer/pix-forge-desktop/releases">Download for Windows</a>
+  <a href="https://github.com/immiProgrammer/pix-forge/releases/latest">Download for Windows</a>
   &nbsp; &middot; &nbsp;
   <a href="#get-started">Get started</a>
   &nbsp; &middot; &nbsp;
@@ -28,7 +28,7 @@ uploads or an account.
 
 ## Download
 
-Open [Releases](https://github.com/immiProgrammer/pix-forge-desktop/releases) and
+Open [Releases](https://github.com/immiProgrammer/pix-forge/releases/latest) and
 download the **Windows EXE installer**, then open it to install PixForge.
 An **MSI installer** is also provided for managed installations.
 

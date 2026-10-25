@@ -14,7 +14,7 @@ domain and HTTPS.
    root workspace configuration and lockfile.
 4. Add your domain and set its container port to **8080**. Enable HTTPS in
    Dokploy. No volume, startup command, or public host port mapping is needed.
-5. Set optional build arguments below, then deploy.
+5. Deploy. No website link environment variables or build arguments are needed.
 
 The GitHub image-publishing workflow is not needed for this option.
 
@@ -50,8 +50,6 @@ Set these GitHub Actions repository variables:
 | ------------------------ | ------------------------------------------------------------ |
 | `CONTAINER_REGISTRY`     | `registry.geto.pk` (hostname only)                           |
 | `SITE_IMAGE_NAME`        | `pix-forge-site` (may include a registry namespace)          |
-| `VITE_RELEASES_URL`      | Optional HTTPS link to the published desktop releases        |
-| `VITE_GITHUB_URL`        | Optional HTTPS source repository link                        |
 | `DOKPLOY_URL`            | Required with the API key; e.g. `https://deploy.example.com` |
 | `DOKPLOY_APPLICATION_ID` | Required with the API key; target application ID             |
 
@@ -74,13 +72,13 @@ After a 25-second propagation wait it logs in, waits 10 seconds, and pushes all
 image tags. The action registers job-end cleanup for its IP list and restores
 Bot Fight Mode. The optional Dokploy API call runs after the push succeeds.
 
-## Build-time public links
+## Public links
 
-Vite embeds `VITE_RELEASES_URL` and `VITE_GITHUB_URL` during the build. Set them
-as Docker build arguments when building in Dokploy, or as the GitHub variables
-above when using the workflow. Changing runtime environment variables does not
-change already-built HTML/JavaScript; rebuild the image to update these links.
-Never put private credentials in `VITE_*` values.
+The site links directly to [the latest release](https://github.com/immiProgrammer/pix-forge/releases/latest)
+and [the source repository](https://github.com/immiProgrammer/pix-forge).
+They are defined in `apps/web/src/App.tsx`. To change them, edit the source and
+rebuild the image. No link-related GitHub variables or Docker build arguments
+are needed; any previously configured link variables can be removed.
 
 ## Local container check
 

@@ -60,9 +60,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=pixforge-site
           cache-to: type=gha,mode=max,scope=pixforge-site
-          build-args: |
-            VITE_RELEASES_URL=${{ vars.VITE_RELEASES_URL }}
-            VITE_GITHUB_URL=${{ vars.VITE_GITHUB_URL }}
 
       - name: Temporarily allow runner through Cloudflare
         uses: xiaotianxt/bypass-cloudflare-for-github-action@v2.1.0

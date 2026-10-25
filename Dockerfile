@@ -19,11 +19,6 @@ COPY turbo.json ./
 COPY packages/typescript-config ./packages/typescript-config
 COPY apps/web ./apps/web
 
-# Public links are embedded in Vite's static output, not read at runtime.
-ARG VITE_RELEASES_URL=""
-ARG VITE_GITHUB_URL=""
-ENV VITE_RELEASES_URL=${VITE_RELEASES_URL}
-ENV VITE_GITHUB_URL=${VITE_GITHUB_URL}
 RUN pnpm --filter @pixforge/web build
 
 FROM nginxinc/nginx-unprivileged:stable-alpine AS runner

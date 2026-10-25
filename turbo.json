@@ -3,8 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"],
-      "env": ["VITE_RELEASES_URL", "VITE_GITHUB_URL"]
+      "outputs": ["dist/**"]
     },
     "test": {
       "outputs": []
