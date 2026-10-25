@@ -26,20 +26,10 @@ import {
 import { useTheme } from "./useTheme";
 import type { Theme } from "./useTheme";
 
-const safeUrl = (value: string | undefined) => {
-  try {
-    const url = new URL(value || "");
-    return url.protocol === "https:" ? url.href : undefined;
-  } catch {
-    return undefined;
-  }
-};
 const releasesUrl =
-  safeUrl(import.meta.env.VITE_RELEASES_URL) ??
   "https://github.com/immiProgrammer/pix-forge/releases/latest";
-const sourceUrl =
-  safeUrl(import.meta.env.VITE_GITHUB_URL) ??
-  "https://github.com/immiProgrammer/pix-forge";
+const sourceUrl = "https://github.com/immiProgrammer/pix-forge";
+
 const buildCommand = "pnpm install\npnpm dist:windows";
 const features = [
   {
