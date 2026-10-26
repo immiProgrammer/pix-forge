@@ -1,27 +1,20 @@
+import OutputSettings from "./OutputSettings";
+import RenamePopover from "./RenamePopover";
+import ExportDialog from "./ExportDialog";
+import StatusBar from "./StatusBar";
+import SimpleDialog from "./SimpleDialog";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ArrowDownToLine,
-  ArrowRight,
-  CaseLower,
   Check,
   ChevronDown,
-  ChevronRight,
-  Folder,
   FolderPlus,
   Grid2X2,
   ImagePlus,
-  Layers2,
   List,
-  LoaderCircle,
-  LockKeyhole,
   Monitor,
   Plus,
   Redo2,
-  RotateCcw,
-  Settings2,
-  ShieldCheck,
   SlidersHorizontal,
-  Sparkles,
   Trash2,
   Undo2,
   X,
@@ -32,20 +25,11 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import Workspace from "./Workspace";
 import Compare from "./Compare";
 import AiRename from "./AiRename";
-import Modal from "./Modal";
 import Titlebar from "./Titlebar";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverTitle,
-} from "./Popover";
-import { Sheet, SheetTrigger, SheetClose, SheetContent } from "./Sheet";
+import { Sheet, SheetTrigger, SheetContent } from "./Sheet";
 import { useCompactLayout } from "./useCompactLayout";
-import { AppSelect, AppCheckbox, AppSwitch } from "./Controls";
-import ExportReport from "./ExportReport";
+import { AppSelect } from "./Controls";
 import {
-  bytes,
   defaultSettings,
   extension,
   invalidStem,
@@ -59,7 +43,6 @@ import {
 } from "./model";
 import type {
   Asset,
-  Format,
   History,
   NamingAction,
   NamingOptions,
@@ -77,13 +60,11 @@ import {
   exportAssets,
   forgetAssets,
   processAsset,
-  revealDestination,
   scan,
 } from "./bridge";
 import type { Collision, Progress } from "./bridge";
 import type { CardSource } from "./bridge";
-import PerformanceSettings from "./PerformanceSettings";
-import { defaultPerformance, normalizePerformance } from "./performance";
+import { normalizePerformance } from "./performance";
 import type { PerformanceOptions } from "./performance";
 type Theme = "light" | "dark" | "system";
 function stored<T>(key: string, fallback: T): T {
@@ -93,38 +74,6 @@ function stored<T>(key: string, fallback: T): T {
     return fallback;
   }
 }
-const formats: { id: Format; label: string; description: string }[] = [
-  {
-    id: "webp",
-    label: "WebP",
-    description: "Lossy compression with transparency support.",
-  },
-  {
-    id: "avif",
-    label: "AVIF",
-    description: "High compression. Slower encoding.",
-  },
-  {
-    id: "jpg",
-    label: "JPG",
-    description: "Lossy compression. No transparency support.",
-  },
-  {
-    id: "jpeg",
-    label: "JPEG",
-    description: "JPEG encoding, with the .jpeg extension.",
-  },
-  {
-    id: "png",
-    label: "PNG",
-    description: "Lossless compression with transparency support.",
-  },
-  {
-    id: "original",
-    label: "Keep source format",
-    description: "Keep each image in its original format.",
-  },
-];
 export default function App() {
   const compact = useCompactLayout();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -724,269 +673,28 @@ export default function App() {
     </button>
   );
   const settingsPanel = (
-    <aside className="settings-panel">
-      <div className="panel-header">
-        <div>
-          <Settings2 size={16} />
-          <h2>Output settings</h2>
-        </div>
-        <div className="panel-header-actions">
-          {" "}
-          <button
-            className="icon-button"
-            aria-label="Reset output settings"
-            title="Reset output settings"
-            onClick={() => {
-              applySettings(defaultSettings);
-              setPerformance(defaultPerformance);
-            }}
-          >
-            <RotateCcw size={14} />
-          </button>
-          {compact && (
-            <SheetClose
-              className="icon-button"
-              aria-label="Close settings"
-              title="Close settings"
-            >
-              <X size={17} />
-            </SheetClose>
-          )}
-        </div>
-      </div>
-      <div className="settings-scroll">
-        <section className="setting-section">
-          <div className="section-label">
-            <span className="step-number">1</span>
-            <h3>Format & quality</h3>
-          </div>
-          <div className="field-label">Output format</div>
-          <div className="format-options">
-            {formats.slice(0, 5).map((f) => (
-              <button
-                className={settings.format === f.id ? "active" : ""}
-                key={f.id}
-                onClick={() => changeSetting("format", f.id)}
-              >
-                {f.label}
-                {f.id === "webp" && <span className="recommended-dot" />}
-              </button>
-            ))}
-          </div>
-          <button
-            id="output-format"
-            className={`original-format ${settings.format === "original" ? "active" : ""}`}
-            onClick={() => changeSetting("format", "original")}
-          >
-            <span className="radio-dot" /> Keep source format
-          </button>
-          <p className="setting-help format-description">
-            {formats.find((f) => f.id === settings.format)?.description}
-          </p>
-          {settings.format === "original" && (
-            <label className="check-label">
-              <AppCheckbox
-                label="Recompress source images"
-                checked={settings.compressOriginal}
-                onCheckedChange={(value) =>
-                  changeSetting("compressOriginal", value)
-                }
-              />{" "}
-              Recompress source images
-            </label>
-          )}
-          {settings.format === "png" ? (
-            <>
-              <label className="field-label">
-                Lossless compression
-                <AppSelect<Settings["pngCompression"]>
-                  label="Lossless compression"
-                  value={settings.pngCompression}
-                  onValueChange={(value) =>
-                    changeSetting("pngCompression", value)
-                  }
-                  options={[
-                    { value: "fast", label: "Fast" },
-                    { value: "balanced", label: "Balanced" },
-                    { value: "best", label: "Maximum compression" },
-                  ]}
-                />
-              </label>
-              <p className="setting-help">
-                All pixels preserved. Compression affects processing time.
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="range-label">
-                <label htmlFor="quality">Quality</label>
-                <output>
-                  {settings.quality}
-                  <span>%</span>
-                </output>
-              </div>
-              <input
-                id="quality"
-                className="quality-slider"
-                type="range"
-                min={0}
-                max={100}
-                value={settings.quality}
-                style={
-                  {
-                    "--range": `${settings.quality}%`,
-                  } as React.CSSProperties
-                }
-                onChange={(e) => changeSetting("quality", +e.target.value)}
-                disabled={
-                  settings.format === "original" && !settings.compressOriginal
-                }
-              />
-              <div className="range-captions">
-                <span>Smaller file</span>
-                <span>Higher quality</span>
-              </div>
-            </>
-          )}
-          {["jpg", "jpeg"].includes(settings.format) && (
-            <label className="color-label">
-              Transparency background
-              <input
-                type="color"
-                value={settings.background}
-                onChange={(e) => changeSetting("background", e.target.value)}
-              />
-            </label>
-          )}
-          {settings.format === "original" && (
-            <p className="setting-help">
-              PNG uses lossless compression. JPEG transparency is flattened to
-              white.
-            </p>
-          )}
-        </section>
-        <section className="setting-section">
-          <div className="section-label">
-            <span className="step-number">2</span>
-            <h3>Image dimensions</h3>
-            <AppSwitch
-              label="Enable dimension limits"
-              checked={settings.resize}
-              onCheckedChange={(value) => changeSetting("resize", value)}
-            />
-          </div>
-          <div
-            className={`dimension-fields ${!settings.resize ? "disabled-fields" : ""}`}
-          >
-            <label>
-              Max. width
-              <div>
-                <input
-                  type="number"
-                  min={1}
-                  max={50000}
-                  placeholder="No limit"
-                  aria-label="Maximum width"
-                  disabled={!settings.resize}
-                  value={settings.maxWidth}
-                  onChange={(e) => changeSetting("maxWidth", e.target.value)}
-                />
-                <span>px</span>
-              </div>
-            </label>
-            <span className="dimension-cross">×</span>
-            <label>
-              Max. height
-              <div>
-                <input
-                  type="number"
-                  min={1}
-                  max={50000}
-                  placeholder="No limit"
-                  aria-label="Maximum height"
-                  disabled={!settings.resize}
-                  value={settings.maxHeight}
-                  onChange={(e) => changeSetting("maxHeight", e.target.value)}
-                />
-                <span>px</span>
-              </div>
-            </label>
-          </div>
-          <label className="check-label">
-            <AppCheckbox
-              label="Allow upscaling"
-              checked={settings.upscale}
-              disabled={!settings.resize}
-              onCheckedChange={(value) => changeSetting("upscale", value)}
-            />{" "}
-            Allow upscaling
-          </label>
-          <p className="setting-help">Preserve aspect ratio.</p>
-        </section>
-        <PerformanceSettings
-          value={performance}
-          onChange={setPerformance}
-          native={desktop}
-          disabled={!desktop || !!(progress && !progress.done)}
-        />
-        <section className="setting-section destination-section">
-          <div className="section-label">
-            <span className="step-number">3</span>
-            <h3>Save destination</h3>
-          </div>
-          <button
-            className="destination-picker"
-            onClick={() => void pickDestination()}
-          >
-            <span className="folder-icon">
-              <Folder size={19} />
-            </span>
-            <span>
-              {destination ? (
-                <>
-                  <strong>{destination.split(/[\\/]/).at(-1)}</strong>
-                  <small>{destination}</small>
-                </>
-              ) : (
-                <>
-                  <strong>Choose a folder</strong>
-                  <small>Output directory</small>
-                </>
-              )}
-            </span>
-            <ChevronRight size={15} />
-          </button>
-          <div className="structure-note">
-            <Layers2 size={14} />
-            <span>Preserve folder structure</span>
-            <Check size={13} />
-          </div>
-        </section>
-      </div>
-      <div className="export-section">
-        <div className="export-summary">
-          <span>
-            {assets.length ? `${assets.length} images` : "No images imported"}
-          </span>
-          <span>{assets.length ? bytes(totalBytes) : "✦"}</span>
-        </div>
-        <button
-          className="primary export-button"
-          disabled={!assets.length || scanning}
-          onClick={() => {
-            setExportScope(selected.size ? "selected" : "all");
-            setProgress(undefined);
-            setExportError("");
-            setSheetOpen(false);
-            setExportOpen(true);
-          }}
-        >
-          <ArrowDownToLine size={17} />
-          {selected.size ? `Export ${selected.size} selected` : "Export images"}
-          <ArrowRight size={16} />
-        </button>
-      </div>
-    </aside>
+    <OutputSettings
+      settings={settings}
+      changeSetting={changeSetting}
+      applySettings={applySettings}
+      performance={performance}
+      setPerformance={setPerformance}
+      compact={compact}
+      busy={busy}
+      destination={destination}
+      pickDestination={pickDestination}
+      imageCount={assets.length}
+      selectedCount={selected.size}
+      totalBytes={totalBytes}
+      scanning={scanning}
+      onExport={() => {
+        setExportScope(selected.size ? "selected" : "all");
+        setProgress(undefined);
+        setExportError("");
+        setSheetOpen(false);
+        setExportOpen(true);
+      }}
+    />
   );
   return (
     <Sheet open={compact && sheetOpen} onOpenChange={setSheetOpen}>
@@ -1084,161 +792,17 @@ export default function App() {
                     </button>
                   </div>
                   <div className="toolbar-group toolbar-right">
-                    <div className="naming-anchor">
-                      <Popover open={naming} onOpenChange={setNaming}>
-                        <PopoverTrigger
-                          className={`text-button ${naming ? "pressed" : ""}`}
-                          disabled={!assets.length}
-                        >
-                          <CaseLower size={18} /> Rename{" "}
-                          <ChevronDown size={12} />
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="naming-popover"
-                          align="center"
-                        >
-                          <div className="popover-title">
-                            <PopoverTitle className="rename-title">
-                              Batch rename
-                            </PopoverTitle>
-                          </div>
-                          <label className="field-label">
-                            Apply to
-                            <AppSelect<"all" | "selected">
-                              label="Naming scope"
-                              value={scope}
-                              onValueChange={setScope}
-                              options={[
-                                {
-                                  value: "all",
-                                  label: `All images (${assets.length})`,
-                                },
-                                {
-                                  value: "selected",
-                                  label: `Selected images (${selected.size})`,
-                                },
-                              ]}
-                            />
-                          </label>
-                          <div className="naming-numbers">
-                            <label>
-                              Start at
-                              <input
-                                type="number"
-                                min={0}
-                                value={namingOptions.start}
-                                onChange={(e) =>
-                                  setNamingOptions((v) => ({
-                                    ...v,
-                                    start: Math.max(0, +e.target.value),
-                                  }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              Padding
-                              <input
-                                type="number"
-                                min={1}
-                                max={8}
-                                value={namingOptions.padding}
-                                onChange={(e) =>
-                                  setNamingOptions((v) => ({
-                                    ...v,
-                                    padding: Math.max(
-                                      1,
-                                      Math.min(8, +e.target.value),
-                                    ),
-                                  }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              Separator
-                              <AppSelect
-                                label="Filename separator"
-                                value={namingOptions.separator}
-                                onValueChange={(separator) =>
-                                  setNamingOptions((v) => ({ ...v, separator }))
-                                }
-                                options={[
-                                  { value: "-", label: "Dash ( - )" },
-                                  { value: "_", label: "Underscore" },
-                                  { value: " ", label: "Space" },
-                                  { value: "", label: "None" },
-                                ]}
-                              />
-                            </label>
-                          </div>
-                          <button
-                            className="naming-action"
-                            onClick={() => runNaming("folder")}
-                          >
-                            <Folder size={16} />
-                            <span>
-                              Folder name + index
-                              <small>shoes-001, shoes-002</small>
-                            </span>
-                            <ArrowRight size={15} />
-                          </button>
-                          <label className="field-label">
-                            Custom name
-                            <input
-                              value={namingOptions.custom}
-                              onKeyDown={(e) => {
-                                if (
-                                  e.key === "Enter" &&
-                                  !e.nativeEvent.isComposing
-                                ) {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  if (!e.repeat) runNaming("custom");
-                                }
-                              }}
-                              onChange={(e) =>
-                                setNamingOptions((v) => ({
-                                  ...v,
-                                  custom: e.target.value,
-                                }))
-                              }
-                            />
-                          </label>
-                          <button
-                            className="naming-action"
-                            onClick={() => runNaming("custom")}
-                          >
-                            <CaseLower size={17} />
-                            <span>
-                              Custom name + index
-                              <small>
-                                {namingOptions.custom}
-                                {namingOptions.separator}
-                                {String(namingOptions.start).padStart(
-                                  namingOptions.padding,
-                                  "0",
-                                )}
-                              </small>
-                            </span>
-                            <ArrowRight size={15} />
-                          </button>
-                          <button
-                            className="naming-action"
-                            onClick={() => runNaming("slug")}
-                          >
-                            <Sparkles size={16} />
-                            <span>
-                              Slugify current names
-                              <small>Summer Photo → summer-photo</small>
-                            </span>
-                            <ArrowRight size={15} />
-                          </button>
-                          <p className="popover-hint">
-                            <LockKeyhole size={12} /> Excluded images keep their
-                            names.
-                          </p>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
+                    <RenamePopover
+                      naming={naming}
+                      setNaming={setNaming}
+                      scope={scope}
+                      setScope={setScope}
+                      imageCount={assets.length}
+                      selectedCount={selected.size}
+                      namingOptions={namingOptions}
+                      setNamingOptions={setNamingOptions}
+                      runNaming={runNaming}
+                    />
                     <button
                       className="text-button"
                       disabled={!assets.length}
@@ -1444,44 +1008,16 @@ export default function App() {
               panel && settingsPanel
             )}
           </div>
-          <footer className="status-bar">
-            <div>
-              <span className={`status-dot ${scanning ? "scanning" : ""}`} />
-              <span>
-                {scanning
-                  ? "Scanning images…"
-                  : assets.length
-                    ? "Workspace ready"
-                    : "Ready"}
-              </span>
-              <i />
-              <span>{assets.length} images</span>
-              {selected.size > 0 && (
-                <>
-                  <i />
-                  <span>{selected.size} selected</span>
-                </>
-              )}
-              {issues.length > 0 && (
-                <button
-                  className="issue-link"
-                  onClick={() => setShowIssues(true)}
-                >
-                  {issues.length} import notices
-                </button>
-              )}
-            </div>
-            <div>
-              {assets.length > 0 && (
-                <span>
-                  {bytes(totalBytes)} original
-                  {processedBytes > 0
-                    ? ` · ${bytes(processedBytes)} previewed (${Object.keys(actualResults).length}/${assets.length})`
-                    : ""}
-                </span>
-              )}
-            </div>
-          </footer>
+          <StatusBar
+            scanning={scanning}
+            imageCount={assets.length}
+            selectedCount={selected.size}
+            issueCount={issues.length}
+            onShowIssues={() => setShowIssues(true)}
+            totalBytes={totalBytes}
+            processedBytes={processedBytes}
+            resultCount={Object.keys(actualResults).length}
+          />
         </div>
         {drop && (
           <div className="drop-overlay">
@@ -1506,245 +1042,31 @@ export default function App() {
           </div>
         )}
         {exportOpen && (
-          <Modal
-            className={`dialog export-dialog ${progress?.done ? "export-finished" : ""}`}
-            label="Review export"
+          <ExportDialog
+            assets={assets}
+            selected={selected}
+            progress={progress}
+            busy={busy}
+            exportScope={exportScope}
+            setExportScope={setExportScope}
+            destination={destination}
+            pickDestination={pickDestination}
+            subfolder={subfolder}
+            setSubfolder={setSubfolder}
+            rootList={rootList}
+            roots={roots}
+            setRoots={setRoots}
+            collision={collision}
+            setCollision={setCollision}
+            duplicatePaths={duplicatePaths}
+            paths={paths}
+            planErrors={planErrors}
+            exportError={exportError}
+            exportTargets={exportTargets}
+            startExport={startExport}
             onClose={() => setExportOpen(false)}
-            locked={busy}
-          >
-            <header>
-              <div>
-                <span className="eyebrow">EXPORT</span>
-                <h2>{progress?.done ? "Export results" : "Review export"}</h2>
-              </div>
-              <button
-                className="icon-button"
-                aria-label="Close export"
-                disabled={busy}
-                onClick={() => setExportOpen(false)}
-                autoFocus
-              >
-                <X size={20} />
-              </button>
-            </header>
-            {!progress?.done && (
-              <>
-                <p className="dialog-intro">
-                  Your originals stay right where they are. We’ll save the new
-                  files below.
-                </p>
-                <label className="field-label">
-                  Images to export
-                  <AppSelect<"all" | "selected">
-                    label="Images to export"
-                    value={exportScope}
-                    disabled={busy}
-                    onValueChange={setExportScope}
-                    options={[
-                      { value: "all", label: `All images (${assets.length})` },
-                      {
-                        value: "selected",
-                        label: `Selected images (${selected.size})`,
-                        disabled: !selected.size,
-                      },
-                    ]}
-                  />
-                </label>
-                <label className="field-label">
-                  Destination
-                  <button
-                    className="destination-picker"
-                    disabled={busy}
-                    onClick={() => void pickDestination()}
-                  >
-                    <Folder size={18} />
-                    <span>{destination || "Choose an output folder"}</span>
-                    <ChevronRight size={15} />
-                  </button>
-                </label>
-                <label className="field-label">
-                  Create a folder inside destination{" "}
-                  <span className="muted">(optional)</span>
-                  <input
-                    value={subfolder}
-                    disabled={busy}
-                    placeholder="e.g. website-ready"
-                    onChange={(e) => setSubfolder(e.target.value)}
-                  />
-                </label>
-                {rootList.length > 0 && (
-                  <details>
-                    <summary>
-                      Imported root folders <span>{rootList.length}</span>
-                    </summary>
-                    <p className="setting-help">
-                      These names appear in your output structure. Give
-                      duplicate roots unique names.
-                    </p>
-                    {rootList.map(([id, name]) => (
-                      <label key={id} className="root-rename">
-                        {name}
-                        <input
-                          aria-label={`Export root ${name} ${id}`}
-                          disabled={busy}
-                          value={roots[id] ?? name}
-                          onChange={(e) =>
-                            setRoots((r) => ({ ...r, [id]: e.target.value }))
-                          }
-                        />
-                      </label>
-                    ))}
-                  </details>
-                )}
-                <label className="field-label">
-                  If an output file already exists
-                  <AppSelect<Collision>
-                    label="Existing file handling"
-                    value={collision}
-                    disabled={busy}
-                    onValueChange={setCollision}
-                    options={[
-                      {
-                        value: "suffix",
-                        label: "Add suffix — keep both files (recommended)",
-                      },
-                      { value: "skip", label: "Skip — keep the existing file" },
-                      {
-                        value: "replace",
-                        label: "Replace — overwrite the existing file",
-                      },
-                    ]}
-                  />
-                </label>
-                {duplicatePaths > 0 && (
-                  <div className="warning-note">
-                    {duplicatePaths} duplicate output paths.{" "}
-                    {collision === "replace"
-                      ? "Use Add suffix or rename conflicting images."
-                      : "Your collision choice will be applied."}
-                  </div>
-                )}
-                <div className="path-preview">
-                  <span>OUTPUT PREVIEW</span>
-                  {paths.slice(0, 3).map((path, i) => (
-                    <code key={`${path}${i}`}>
-                      <Folder size={12} />
-                      {subfolder ? `${subfolder}/` : ""}
-                      {path}
-                    </code>
-                  ))}
-                  {paths.length > 3 && (
-                    <small>+ {paths.length - 3} more images</small>
-                  )}
-                </div>
-                {planErrors.length > 0 && (
-                  <div className="error-note">
-                    {planErrors.slice(0, 4).map((e) => (
-                      <p key={e}>{e}</p>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-            {progress && (
-              <div className="export-progress" aria-live="polite">
-                <div>
-                  {busy && <LoaderCircle className="spin" size={17} />}
-                  <strong>
-                    {progress.done
-                      ? progress.cancelled
-                        ? "Export cancelled"
-                        : progress.failed
-                          ? "Export finished with errors"
-                          : "Export complete"
-                      : "Preparing your images…"}
-                  </strong>
-                  <span>
-                    {progress.completed +
-                      progress.failed +
-                      (progress.skipped || 0)}{" "}
-                    / {progress.total}
-                  </span>
-                </div>
-                <progress
-                  value={
-                    progress.completed +
-                    progress.failed +
-                    (progress.skipped || 0)
-                  }
-                  max={progress.total}
-                />
-                <p>
-                  {progress.completed} saved · {progress.failed} failed
-                  {progress.skipped ? ` · ${progress.skipped} skipped` : ""}
-                  {progress.cancelled ? " · Completed files were kept." : ""}
-                </p>
-                {busy && <small>{progress.current}</small>}
-                {progress.failures &&
-                  Object.keys(progress.failures).length > 0 && (
-                    <ul className="issue-list">
-                      {Object.entries(progress.failures).map(([id, error]) => (
-                        <li key={id}>
-                          {assets.find((a) => a.id === id)?.originalName}:{" "}
-                          {error}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-              </div>
-            )}
-            {progress?.done &&
-              progress.outputs &&
-              progress.outputs.length > 0 && (
-                <ExportReport outputs={progress.outputs} />
-              )}
-            {exportError && <div className="error-note">{exportError}</div>}
-            <footer>
-              {progress?.done ? (
-                <>
-                  <button onClick={() => setExportOpen(false)}>
-                    Back to workspace
-                  </button>
-                  {progress.failed > 0 && (
-                    <button onClick={() => void startExport(true)}>
-                      Retry failed images
-                    </button>
-                  )}
-                  {desktop && progress.completed > 0 && (
-                    <button
-                      className="primary"
-                      onClick={() => void revealDestination(destination)}
-                    >
-                      <Folder size={16} /> Open output folder
-                    </button>
-                  )}
-                </>
-              ) : busy ? (
-                <button onClick={() => abortExport.current?.abort()}>
-                  Cancel export
-                </button>
-              ) : (
-                <>
-                  <span className="safe-note">
-                    <ShieldCheck size={14} /> Originals protected
-                  </span>
-                  <button
-                    className="primary"
-                    disabled={
-                      !destination ||
-                      !exportTargets.length ||
-                      !!planErrors.length ||
-                      (duplicatePaths > 0 && collision === "replace")
-                    }
-                    onClick={() => void startExport()}
-                  >
-                    <ArrowDownToLine size={16} /> Export {exportTargets.length}{" "}
-                    images
-                  </button>
-                </>
-              )}
-            </footer>
-          </Modal>
+            onCancel={() => abortExport.current?.abort()}
+          />
         )}
         {aiRenameOpen && (
           <AiRename
@@ -1840,31 +1162,5 @@ export default function App() {
         )}
       </div>
     </Sheet>
-  );
-}
-function SimpleDialog({
-  title,
-  onClose,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Modal className="dialog" label={title} onClose={onClose}>
-      <header>
-        <h2>{title}</h2>
-        <button
-          className="icon-button"
-          aria-label="Close dialog"
-          onClick={onClose}
-          autoFocus
-        >
-          <X size={18} />
-        </button>
-      </header>
-      {children}
-    </Modal>
   );
 }
