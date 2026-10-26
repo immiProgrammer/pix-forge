@@ -465,7 +465,7 @@ export default function App() {
               >
                 <figure className="collection-photo photo-audio">
                   <img
-                    src="/images/product-headphones.jpg"
+                    src="/images/product-headphones.webp"
                     alt="Studio headphones on a yellow background"
                     width="1600"
                     height="1067"
@@ -474,7 +474,7 @@ export default function App() {
                 </figure>
                 <figure className="collection-photo photo-skincare">
                   <img
-                    src="/images/product-skincare.jpg"
+                    src="/images/product-skincare.webp"
                     alt="Skincare product collection"
                     width="1600"
                     height="1067"
@@ -483,7 +483,7 @@ export default function App() {
                 </figure>
                 <figure className="collection-photo photo-ceramic">
                   <img
-                    src="/images/product-ceramic.jpg"
+                    src="/images/product-ceramic.webp"
                     alt="Ceramic coffee cup"
                     width="1600"
                     height="1067"
