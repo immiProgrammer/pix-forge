@@ -55,8 +55,15 @@ Naming tools are actions with explicit All images or Selected images scope:
 - **Folder name + index** uses each image's immediate parent folder and restarts numbering within that folder.
 - **Custom name + index** uses one sequence across the target images. Press Enter in its input to run it.
 - **Slugify current names** makes Unicode-safe, lowercase, hyphen-separated stems while removing unsafe filename characters.
+- **Find & replace** opens a compact workspace bar for literal or regex matching. It also opens with Ctrl/Cmd+H; Ctrl/Cmd+F opens Find without the replacement row.
 
 Choose the starting index, padding, and separator. Manual edits remain until another action changes them; they do not automatically exclude an image. Excluded images remain directly editable. Manual name edits, exclusion changes, and each whole batch operation have Undo/Redo history. A new change after Undo clears the redo branch.
+
+Find searches current output filename stems in display order. Enter/Shift+Enter or the arrow buttons move to the next/previous matching image, wrapping at the ends; the counter counts images, not occurrences. A matching card is revealed without changing selection. In comparison mode, navigation changes the compared image. Count matches refreshes the result; Escape closes the bar. A blank Match does nothing.
+
+Expand the replacement row to use Replace current or Replace all. Choose All images or snapshot the current Selected images as the scope. Match case is on by default; the `.*` toggle enables Unicode JavaScript regular expressions without surrounding slashes. Every occurrence is replaced. Literal replacements treat dollar signs as text; regex replacements support `$1`, `$<name>`, `$&`, and `$$`. Empty Replace removes matched text. Filenames are not automatically slugified, and extensions and folders stay unchanged.
+
+Excluded images remain searchable but cannot be batch replaced. Replacement previews show the active before/after name and the number of images that would change. Unsafe, empty, reserved, overly long, or conflicting names block application. Replace all is one undo step; each Replace current is one step. Searching and grid/list navigation do not generate processed previews. Regex work runs separately with cancellation and a time limit so a slow expression cannot freeze the interface.
 
 The **AI rename** button opens a two-step dialog. Choose folder-based naming or an optional custom product name; leave the custom name blank to clean up individual existing names. Add optional instructions, then copy the generated prompt into an AI tool. The default instructions preserve meaningful product sizes, colors, models, and variants, remove capture noise such as WhatsApp/Screenshot and unrelated dates, and slugify unless your instructions request a different format. The prompt contains names and folder paths, not image uploads.
 

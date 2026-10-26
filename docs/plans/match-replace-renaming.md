@@ -1,6 +1,6 @@
 # Match-and-replace renaming
 
-Status: planned. The App component refactor is complete; the feature is not implemented.
+Status: implemented. The matching engine, cancellable worker, find/replace bar, workspace and comparison navigation, and naming-history integration are in place. Automated tests cover matching, replacement validation, wrapped navigation, and worker cancellation/timeouts. Production builds and frontend tests pass; visual/desktop interaction checks are not part of this automated verification.
 
 ## Interface
 
@@ -20,7 +20,7 @@ Status: planned. The App component refactor is complete; the feature is not impl
 
 - Operate on current output filename stems only, preserving folders, extensions, stable image IDs, and source paths.
 - Literal mode replaces every occurrence of the exact Match text. Treat replacement characters such as `$1` literally in this mode.
-- Regex mode uses JavaScript regex syntax without surrounding `/.../`. Replace every match and support replacement tokens such as `$1`, `$<name>`, `$&`, and `$$`. Show validation errors for invalid patterns or unsupported flags.
+- Regex mode uses Unicode JavaScript regex syntax without surrounding `/.../`. Replace every match and support replacement tokens such as `$1`, `$<name>`, `$&`, and `$$`. Flags are fixed to global/Unicode, with the Match case toggle controlling case insensitivity. Show validation errors for invalid patterns.
 - Make case sensitivity explicit. Reset regex state for every filename so one filename cannot affect the next.
 - Handle zero-width regex matches without hanging or repeatedly inserting at the same position. Follow JavaScript Unicode-aware replacement semantics.
 - A blank Match field is an inactive search: no matches, no navigation, and no replacement. This follows the find-widget model and avoids implicit insertion into every name. A nonempty regex such as `^` can explicitly prepend text. Empty Replace removes matched text, as confirmed by the user.

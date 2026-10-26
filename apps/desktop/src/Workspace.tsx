@@ -76,6 +76,8 @@ interface Props {
   onImport: (folder: boolean) => void;
   scanning: boolean;
   loadingCount: number;
+  searchActiveId?: string;
+  visible?: boolean;
 }
 export default function Workspace(p: Props) {
   const container = useRef<HTMLDivElement>(null);
@@ -116,6 +118,12 @@ export default function Workspace(p: Props) {
     overscan: p.view === "list" ? 14 : 4,
   });
   const rows = virtual.getVirtualItems();
+  useEffect(() => {
+    if (p.visible === false || !p.searchActiveId) return;
+    const index = p.assets.findIndex((asset) => asset.id === p.searchActiveId);
+    if (index >= 0)
+      virtual.scrollToIndex(Math.floor(index / columns), { align: "auto" });
+  }, [p.searchActiveId, p.visible, p.assets, columns]);
   const visibleKey = rows.map((r) => r.index).join(",");
   useEffect(() => {
     if (loadingCount > 0 && previousLoadingCount.current === 0)
@@ -422,7 +430,7 @@ const WorkspaceRow = memo(function WorkspaceRow({
             <article
               key={asset.id}
               data-id={asset.id}
-              className={`asset-card ${p.selected.has(asset.id) ? "selected" : ""}`}
+              className={`asset-card ${p.selected.has(asset.id) ? "selected" : ""} ${p.searchActiveId === asset.id ? "find-active" : ""}`}
               onClick={(e) => select(e, asset.id)}
               onDoubleClick={(e) => {
                 if (

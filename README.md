@@ -62,6 +62,11 @@ a private repository are available only to people with repository access.
 
 For example, `IMG_4821.jpg` can become `linen-shirt-001.webp`.
 
+Press **Ctrl+F** to find filenames and move between matching images with **Enter**
+or **Shift+Enter**. Press **Ctrl+H** to replace text in one name or all matches,
+with optional regular expressions. Leave Replace empty to remove matched text.
+Naming changes support Undo.
+
 ## Export performance
 
 Choose **Low memory**, **Balanced**, or **Maximum speed** in the settings panel.

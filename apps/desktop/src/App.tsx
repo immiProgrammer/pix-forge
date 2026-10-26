@@ -3,6 +3,7 @@ import RenamePopover from "./RenamePopover";
 import ExportDialog from "./ExportDialog";
 import StatusBar from "./StatusBar";
 import SimpleDialog from "./SimpleDialog";
+import FindReplaceBar from "./FindReplaceBar";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Check,
@@ -14,6 +15,7 @@ import {
   Monitor,
   Plus,
   Redo2,
+  Search,
   SlidersHorizontal,
   Trash2,
   Undo2,
@@ -75,6 +77,32 @@ function stored<T>(key: string, fallback: T): T {
   }
 }
 export default function App() {
+  const [findRequest, setFindRequest] = useState<{
+    serial: number;
+    replace: boolean;
+  } | null>(null);
+  const [searchActiveId, setSearchActiveId] = useState<string>();
+  const openFind = useCallback((replace = false) => {
+    setFindRequest((current) => ({
+      serial: (current?.serial ?? 0) + 1,
+      replace,
+    }));
+  }, []);
+  const showSearchImage = useCallback((id: string | undefined) => {
+    setSearchActiveId(id);
+    if (id) setCompareId((current) => (current ? id : current));
+  }, []);
+  const closeFind = useCallback(() => {
+    setFindRequest(null);
+    setSearchActiveId(undefined);
+    requestAnimationFrame(() =>
+      document
+        .querySelector<HTMLElement>(
+          ".compare-surface, .file-workspace:not([hidden]) .workspace",
+        )
+        ?.focus({ preventScroll: true }),
+    );
+  }, []);
   const compact = useCompactLayout();
   const [sheetOpen, setSheetOpen] = useState(false);
   useEffect(() => {
@@ -408,6 +436,41 @@ export default function App() {
     });
   }, []);
   useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if (
+        !(event.ctrlKey || event.metaKey) ||
+        event.altKey ||
+        event.isComposing ||
+        !["f", "h"].includes(event.key.toLowerCase())
+      )
+        return;
+      if (
+        exportOpen ||
+        sheetOpen ||
+        showIssues ||
+        clearOpen ||
+        help ||
+        aiRenameOpen ||
+        document.querySelector('[role="dialog"]')
+      )
+        return;
+      event.preventDefault();
+      event.stopPropagation();
+      setNaming(false);
+      openFind(event.key.toLowerCase() === "h");
+    };
+    window.addEventListener("keydown", handler, true);
+    return () => window.removeEventListener("keydown", handler, true);
+  }, [
+    openFind,
+    exportOpen,
+    sheetOpen,
+    showIssues,
+    clearOpen,
+    help,
+    aiRenameOpen,
+  ]);
+  useEffect(() => {
     function key(e: KeyboardEvent) {
       if (
         (e.target as HTMLElement).closest(
@@ -654,6 +717,16 @@ export default function App() {
   );
   const compareAsset = assets.find((a) => a.id === compareId);
   const busy = !!progress && !progress.done;
+  const findControl = (
+    <button
+      className="icon-button"
+      aria-label="Find filenames"
+      title="Find filenames (Ctrl/Cmd+F)"
+      onClick={() => openFind()}
+    >
+      <Search size={16} />
+    </button>
+  );
   const settingsToggle = compact ? (
     <SheetTrigger
       className={`icon-button panel-toggle ${sheetOpen ? "pressed" : ""}`}
@@ -802,7 +875,12 @@ export default function App() {
                       namingOptions={namingOptions}
                       setNamingOptions={setNamingOptions}
                       runNaming={runNaming}
+                      onFindReplace={() => {
+                        setNaming(false);
+                        openFind(true);
+                      }}
                     />
+                    {findControl}
                     <button
                       className="text-button"
                       disabled={!assets.length}
@@ -914,8 +992,27 @@ export default function App() {
                   </div>
                 </div>
               )}
+              {findRequest && (
+                <FindReplaceBar
+                  assets={assets}
+                  selected={selected}
+                  settings={settings}
+                  roots={roots}
+                  request={findRequest}
+                  onActive={showSearchImage}
+                  onClose={closeFind}
+                  onApply={(next, count) => {
+                    commit(next);
+                    setNotice(
+                      `${count} image names updated. Undo is available.`,
+                    );
+                  }}
+                />
+              )}
               <div className="file-workspace" hidden={!!compareAsset}>
                 <Workspace
+                  searchActiveId={searchActiveId}
+                  visible={!compareAsset}
                   imageFit={imageFit}
                   onSourceChange={updateSource}
                   assets={assets}
@@ -977,7 +1074,12 @@ export default function App() {
               </div>
               {compareAsset && (
                 <Compare
-                  settingsControl={settingsToggle}
+                  settingsControl={
+                    <>
+                      {findControl}
+                      {settingsToggle}
+                    </>
+                  }
                   asset={compareAsset}
                   format={extension(compareAsset, settings)}
                   result={actualResults[compareAsset.id]}
@@ -1137,6 +1239,9 @@ export default function App() {
                 ["Select a range", "Shift + click"],
                 ["Move selection", "Arrow keys"],
                 ["Open comparison", "Double-click / Enter"],
+                ["Find filenames", "Ctrl / Cmd + F"],
+                ["Find and replace", "Ctrl / Cmd + H"],
+                ["Next / previous match", "Enter / Shift + Enter"],
                 ["Undo naming", "Ctrl / ⌘ + Z"],
                 ["Redo naming", "Ctrl / ⌘ + Shift + Z"],
                 ["Remove selected", "Delete"],

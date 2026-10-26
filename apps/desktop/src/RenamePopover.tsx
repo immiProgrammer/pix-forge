@@ -6,6 +6,7 @@ import {
   Folder,
   LockKeyhole,
   Sparkles,
+  Search,
 } from "lucide-react";
 import {
   Popover,
@@ -26,6 +27,7 @@ interface Props {
   namingOptions: NamingOptions;
   setNamingOptions: Dispatch<SetStateAction<NamingOptions>>;
   runNaming: (action: NamingAction) => void;
+  onFindReplace: () => void;
 }
 
 export default function RenamePopover({
@@ -38,6 +40,7 @@ export default function RenamePopover({
   namingOptions,
   setNamingOptions,
   runNaming,
+  onFindReplace,
 }: Props) {
   return (
     <div className="naming-anchor">
@@ -164,6 +167,13 @@ export default function RenamePopover({
             <span>
               Slugify current names
               <small>Summer Photo → summer-photo</small>
+            </span>
+            <ArrowRight size={15} />
+          </button>
+          <button className="naming-action" onClick={onFindReplace}>
+            <Search size={16} />
+            <span>
+              Find & replace<small>Match text or a regular expression</small>
             </span>
             <ArrowRight size={15} />
           </button>
