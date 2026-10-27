@@ -22,10 +22,10 @@ The repository-root `Dockerfile` builds the website and serves static files with
 - `src/theme.css`: independent light/dark colors matching the desktop palette.
 - `src/fonts.css`: local Newsreader and Roboto faces, preloaded in `index.html`.
 - `src/useTheme.ts`: saved Light/Dark/System preference.
-- `src/landing.css` and `src/showcase.css`: layout, graphics, and screenshots.
+- `src/landing.css`: responsive layout, screenshot backdrops, menus, and FAQ animation.
 - `src/App.tsx`: page content, actual app screenshots, and animated FAQ.
 
-The workspace screenshots follow the site's light/dark theme. Comparison and list screenshots are static captures of the desktop app. The hero's product collage is decorative. The grid background fades before the format strip.
+The workspace screenshots follow the site's light/dark theme. Comparison and list screenshots are static captures of the desktop app. The homepage uses a left-aligned introduction, numbered two-column sections, and large screenshot panels with subtle green and gray backdrops.
 
 ## Releases and source links
 
@@ -35,10 +35,10 @@ There is no AI account connection, analytics integration, or external image requ
 
 ## Image credits
 
-The workspace illustration uses locally bundled, resized sneaker photos from Unsplash:
+The repository includes locally bundled product photos from Unsplash, retained from the earlier homepage design:
 
 - [Red sneaker](https://images.unsplash.com/photo-1542291026-7eec264c27ff), image ID `photo-1542291026-7eec264c27ff`.
 - Image IDs `photo-1549298916-b41d501d3772`, `photo-1600185365926-3a2ce3cdb9eb`, and `photo-1600269452121-4f2416e55c28` from [Unsplash](https://unsplash.com/).
-- The hero uses [headphones](https://images.unsplash.com/photo-1505740420928-5e560c06d30e), [skincare products](https://images.unsplash.com/photo-1608571423902-eed4a5ad8108), and a [ceramic cup](https://images.unsplash.com/photo-1514228742587-6b1558fcca3d), also downloaded from Unsplash.
+- [Headphones](https://images.unsplash.com/photo-1505740420928-5e560c06d30e), [skincare products](https://images.unsplash.com/photo-1608571423902-eed4a5ad8108), and a [ceramic cup](https://images.unsplash.com/photo-1514228742587-6b1558fcca3d), also downloaded from Unsplash.
 
 Photos are used under the [Unsplash License](https://unsplash.com/license). Font packages and other third-party dependencies retain their respective licenses.
