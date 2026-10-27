@@ -1,6 +1,6 @@
 [package]
 name = "pix-forge"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local batch image workbench"
 authors = ["PixForge"]
 edition = "2021"

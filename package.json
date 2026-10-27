@@ -1,6 +1,6 @@
 {
   "name": "pix-forge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "PixForge desktop application and website monorepo",
   "packageManager": "pnpm@12.15.0",

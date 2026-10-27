@@ -1,6 +1,6 @@
 {
   "name": "@pixforge/desktop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "PixForge desktop image converter, compressor, and renamer",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
